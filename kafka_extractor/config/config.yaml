@@ -17,3 +17,6 @@ collectd:
     - memory___memory___free
     - virt___memory___unused
     - virt___percent___virt_cpu_total
+    - ping___ping___<compute_ip_address>
+    - ping___ping___<controller_ip_address>
+    - ping___ping___<kafka_server_address>
