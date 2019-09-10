@@ -20,3 +20,8 @@ collectd:
     - ping___ping___<compute_ip_address>
     - ping___ping___<controller_ip_address>
     - ping___ping___<kafka_server_address>
+
+  mesurement_maps:
+      memory___memory___free: memory_free
+      virt___memory___unused: memory_free
+      virt___percent___virt_cpu_total: cpu_total

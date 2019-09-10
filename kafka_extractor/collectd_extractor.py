@@ -9,6 +9,8 @@ import pdb
 from config import cfg
 from confluent_kafka import Producer, Consumer, KafkaError, TopicPartition
 
+collectd_cfg = cfg['collectd']
+
 def delivery_report(err, msg):
     """ Called once for each message produced to indicate delivery result.
         Triggered by poll() or flush(). """
@@ -16,16 +18,27 @@ def delivery_report(err, msg):
         print('Message delivery failed: {}'.format(err))
 
 def is_active_mesurement(data):
-    if (cfg['collectd']['mesurement_filters_enable'] == False):
+    if (collectd_cfg['mesurement_filters_enable'] == False):
         return True
-    s = "%s___%s___%s" %(
+    mesurement_type = "%s___%s___%s" %(
         data['plugin'],
         data['type'],
         data['type_instance'],
         )
-    if (s in cfg['collectd']['mesurement_filters']):
+    if (mesurement_type in collectd_cfg['mesurement_filters']):
         return True
     return False
+
+def get_mapped_mesurement_type(data):
+    mesurement_type = "%s___%s___%s" %(
+        data['plugin'],
+        data['type'],
+        data['type_instance'],
+        )
+    mapped_mesurement = collectd_cfg['mesurement_maps'].get(mesurement_type)
+    if (mapped_mesurement is not None):
+        return collectd_cfg['mesurement_maps'][mesurement_type]
+    return mesurement_type
 
 def extract(message):
     data = message.value().decode('utf-8')
@@ -37,23 +50,31 @@ def extract(message):
         return result
 
     for i in range(0, len(data['values'])):
-        topic = "%s___%s___%s___%s___%s___%s___%s" %(
+        # topic = "%s___%s___%s___%s___%s___%s___%s" %(
+        #     data['host'],
+        #     data['plugin'],
+        #     data['plugin_instance'],
+        #     data['type'],
+        #     data['type_instance'],
+        #     data['dsnames'][i],
+        #     data['dstypes'][i],
+        #     )
+        topic = "%s___%s___%s___%s___%s" %(
             data['host'],
-            data['plugin'],
             data['plugin_instance'],
-            data['type'],
-            data['type_instance'],
+            get_mapped_mesurement_type(data),
             data['dsnames'][i],
             data['dstypes'][i],
             )
+
         result.append((topic, data['values'][i], data['time']))
     return result
 
 def main():
-    consumer = Consumer(cfg['collectd']['consumer'])
+    consumer = Consumer(collectd_cfg['consumer'])
     consumer.subscribe(['collectd'])
 
-    producer = Producer(cfg['collectd']['producer'])
+    producer = Producer(collectd_cfg['producer'])
     # Trigger any available delivery report callbacks from previous produce() calls
     # see: https://github.com/confluentinc/confluent-kafka-python/issues/16
     producer.poll(0)
