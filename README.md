@@ -15,3 +15,9 @@ The config file also shows which topic available for consume:
 ```
 vi config/config.yaml
 ```
+
+## Web GUI
+We use [kafdrop 3](https://github.com/obsidiandynamics/kafdrop) to monitor available topics and data. This should be automatically installed with Kafka Extractor if using ni-testbed ansible script.
+```
+http://localhost:9000
+```
