@@ -1,5 +1,4 @@
 collectd:
-
   consumer:
     bootstrap.servers: <kafka_server_address>:9092
     group.id: collectd_extractor
@@ -10,6 +9,7 @@ collectd:
     queue.buffering.max.messages: 500000
     queue.buffering.max.ms: 1000
     batch.num.messages: 100
+    api.version.request: True
 
   mesurement_filters_enable: True
   mesurement_filters:
@@ -22,6 +22,9 @@ collectd:
     - ping___ping___<kafka_server_address>
 
   mesurement_maps:
-      memory___memory___free: memory_free
-      virt___memory___unused: memory_free
-      virt___percent___virt_cpu_total: cpu_total
+    memory___memory___free: memory_free
+    virt___memory___unused: memory_free
+    virt___percent___virt_cpu_total: cpu_total
+    ping___ping___<compute_ip_address>: ping___NI-Compute-compute
+    ping___ping___<controller_ip_address>: ping___NI-Compute-controller
+    ping___ping___<kafka_server_address>: ping___NI-Compute-kafka

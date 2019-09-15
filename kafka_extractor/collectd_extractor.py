@@ -66,8 +66,8 @@ def extract(message):
             data['dsnames'][i],
             data['dstypes'][i],
             )
-
-        result.append((topic, data['values'][i], data['time']))
+        epoch_ms = data['time'] * 1000
+        result.append((topic, data['values'][i], epoch_ms))
     return result
 
 def main():
