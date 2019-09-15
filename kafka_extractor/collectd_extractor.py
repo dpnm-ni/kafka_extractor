@@ -17,28 +17,28 @@ def delivery_report(err, msg):
     if err is not None:
         print('Message delivery failed: {}'.format(err))
 
-def is_active_mesurement(data):
-    if (collectd_cfg['mesurement_filters_enable'] == False):
+def is_active_measurement(data):
+    if (collectd_cfg['measurement_filters_enable'] == False):
         return True
-    mesurement_type = "%s___%s___%s" %(
+    measurement_type = "%s___%s___%s" %(
         data['plugin'],
         data['type'],
         data['type_instance'],
         )
-    if (mesurement_type in collectd_cfg['mesurement_filters']):
+    if (measurement_type in collectd_cfg['measurement_filters']):
         return True
     return False
 
-def get_mapped_mesurement_type(data):
-    mesurement_type = "%s___%s___%s" %(
+def get_mapped_measurement_type(data):
+    measurement_type = "%s___%s___%s" %(
         data['plugin'],
         data['type'],
         data['type_instance'],
         )
-    mapped_mesurement = collectd_cfg['mesurement_maps'].get(mesurement_type)
-    if (mapped_mesurement is not None):
-        return collectd_cfg['mesurement_maps'][mesurement_type]
-    return mesurement_type
+    mapped_measurement = collectd_cfg['measurement_maps'].get(measurement_type)
+    if (mapped_measurement is not None):
+        return collectd_cfg['measurement_maps'][measurement_type]
+    return measurement_type
 
 def extract(message):
     data = message.value().decode('utf-8')
@@ -46,7 +46,7 @@ def extract(message):
     data = data[0]
     result = []
 
-    if not is_active_mesurement(data):
+    if not is_active_measurement(data):
         return result
 
     for i in range(0, len(data['values'])):
@@ -62,7 +62,7 @@ def extract(message):
         topic = "%s___%s___%s___%s___%s" %(
             data['host'],
             data['plugin_instance'],
-            get_mapped_mesurement_type(data),
+            get_mapped_measurement_type(data),
             data['dsnames'][i],
             data['dstypes'][i],
             )

@@ -11,8 +11,8 @@ collectd:
     batch.num.messages: 100
     api.version.request: True
 
-  mesurement_filters_enable: True
-  mesurement_filters:
+  measurement_filters_enable: True
+  measurement_filters:
     # format: {plugin}___{type}___{type_instance}
     - memory___memory___free
     - virt___memory___unused
@@ -21,7 +21,7 @@ collectd:
     - ping___ping___<controller_ip_address>
     - ping___ping___<kafka_server_address>
 
-  mesurement_maps:
+  measurement_maps:
     memory___memory___free: memory_free
     virt___memory___unused: memory_free
     virt___percent___virt_cpu_total: cpu_total

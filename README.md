@@ -1,1 +1,1 @@
-# Kafka extractor
+# Kafka Extractor
