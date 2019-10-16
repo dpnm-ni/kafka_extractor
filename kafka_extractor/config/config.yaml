@@ -17,6 +17,8 @@ collectd:
     - memory___memory___free
     - virt___memory___unused
     - virt___percent___virt_cpu_total
+    - aggregation___cpu___idle
+    - interface___if_octets___
     - ping___ping___<compute_ip_address>
     - ping___ping___<controller_ip_address>
     - ping___ping___<kafka_server_address>
@@ -24,7 +26,9 @@ collectd:
   measurement_maps:
     memory___memory___free: memory_free
     virt___memory___unused: memory_free
-    virt___percent___virt_cpu_total: cpu_total
-    ping___ping___<compute_ip_address>: ping___NI-Compute-compute
-    ping___ping___<controller_ip_address>: ping___NI-Compute-controller
-    ping___ping___<kafka_server_address>: ping___NI-Compute-kafka
+    virt___percent___virt_cpu_total: vm_cpu_total
+    aggregation___cpu___idle: node_cpu_idle
+    ping___ping___<compute_ip_address>: ping_NI-Compute-compute
+    ping___ping___<controller_ip_address>: ping_NI-Compute-controller
+    ping___ping___<kafka_server_address>: ping_NI-Compute-kafka
+    interface___if_octets___: if_octets
