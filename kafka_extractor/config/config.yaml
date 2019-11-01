@@ -11,24 +11,14 @@ collectd:
     batch.num.messages: 100
     api.version.request: True
 
-  measurement_filters_enable: True
-  measurement_filters:
-    # format: {plugin}___{type}___{type_instance}
-    - memory___memory___free
-    - virt___memory___unused
-    - virt___percent___virt_cpu_total
-    - aggregation___cpu___idle
-    - interface___if_octets___
-    - ping___ping___<compute_ip_address>
-    - ping___ping___<controller_ip_address>
-    - ping___ping___<kafka_server_address>
-
   measurement_maps:
     memory___memory___free: memory_free
+    cpu___percent___active: cpu_usage
     virt___memory___unused: memory_free
-    virt___percent___virt_cpu_total: vm_cpu_total
-    aggregation___cpu___idle: node_cpu_idle
+    virt___percent___virt_cpu_total: cpu_usage
     ping___ping___<compute_ip_address>: ping_NI-Compute-compute
     ping___ping___<controller_ip_address>: ping_NI-Compute-controller
     ping___ping___<kafka_server_address>: ping_NI-Compute-kafka
     interface___if_octets___: if_octets
+    interface___if_packets___: if_packets
+    interface___if_dropped___: if_dropped

@@ -17,18 +17,6 @@ def delivery_report(err, msg):
     if err is not None:
         print('Message delivery failed: {}'.format(err))
 
-def is_active_measurement(data):
-    if (collectd_cfg['measurement_filters_enable'] == False):
-        return True
-    measurement_type = "%s___%s___%s" %(
-        data['plugin'],
-        data['type'],
-        data['type_instance'],
-        )
-    if (measurement_type in collectd_cfg['measurement_filters']):
-        return True
-    return False
-
 def get_mapped_measurement_type(data):
     measurement_type = "%s___%s___%s" %(
         data['plugin'],
@@ -45,9 +33,6 @@ def extract(message):
     data = json.loads(message.value())
     data = data[0]
     result = []
-
-    if not is_active_measurement(data):
-        return result
 
     for i in range(0, len(data['values'])):
         # topic = "%s___%s___%s___%s___%s___%s___%s" %(
