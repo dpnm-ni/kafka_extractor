@@ -1,0 +1,20 @@
+collectd:
+  consumer:
+    bootstrap.servers: <kafka_server_address>:9092
+    group.id: collectd_extractor
+    auto.offset.reset: earliest
+
+  producer:
+    bootstrap.servers: <kafka_server_address>:9092
+    queue.buffering.max.messages: 500000
+    queue.buffering.max.ms: 1000
+    batch.num.messages: 100
+    api.version.request: True
+
+  # collectd ping use IP by default. In NI project, we use
+  # bellow setting to replace part of IP addr with custom text.
+  # Remove ping config section if you don't want.
+  ping:
+    subnet: <IP_subnet_string_to_replace>
+    text: <text>
+    replace_dot_by_slash: True

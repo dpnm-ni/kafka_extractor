@@ -6,6 +6,8 @@ import sys
 import json
 import pdb
 
+import collectd_metrics
+
 from config import cfg
 from confluent_kafka import Producer, Consumer, KafkaError, TopicPartition
 
@@ -16,17 +18,6 @@ def delivery_report(err, msg):
         Triggered by poll() or flush(). """
     if err is not None:
         print('Message delivery failed: {}'.format(err))
-
-def get_mapped_measurement_type(data):
-    measurement_type = "%s___%s___%s" %(
-        data['plugin'],
-        data['type'],
-        data['type_instance'],
-        )
-    mapped_measurement = collectd_cfg['measurement_maps'].get(measurement_type)
-    if (mapped_measurement is not None):
-        return collectd_cfg['measurement_maps'][measurement_type]
-    return measurement_type
 
 def extract(message):
     data = message.value().decode('utf-8')
@@ -44,10 +35,9 @@ def extract(message):
         #     data['dsnames'][i],
         #     data['dstypes'][i],
         #     )
-        topic = "%s___%s___%s___%s___%s" %(
+        topic = "%s___%s___%s___%s" %(
             data['host'],
-            data['plugin_instance'],
-            get_mapped_measurement_type(data),
+            collectd_metrics.get_metric_name(data),
             data['dsnames'][i],
             data['dstypes'][i],
             )
