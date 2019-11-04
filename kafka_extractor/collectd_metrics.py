@@ -50,9 +50,8 @@ def virt(data):
 def ping(data):
     if data['type'] == 'ping':
         other_host = data['type_instance']
-        if ping_cfg is not None:
-            other_host = other_host.replace(ping_cfg["subnet"], ping_cfg["text"])
-            if ping_cfg["replace_dot_by_slash"] is True:
-                other_host = other_host.replace('.', '-')
+        # other host is IP address format: x.x.x.x. Re-format to NI-Compute-x-x
+        other_host = other_host.split('.')
+        other_host = "%s-%s-%s" %("NI-Compute", other_host[2], other_host[3])
 
         return ('%s___%s' %(other_host, data['type']))
