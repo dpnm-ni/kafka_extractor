@@ -23,27 +23,7 @@ def extract(message):
     data = message.value().decode('utf-8')
     data = json.loads(message.value())
     data = data[0]
-    result = []
-
-    for i in range(0, len(data['values'])):
-        # topic = "%s___%s___%s___%s___%s___%s___%s" %(
-        #     data['host'],
-        #     data['plugin'],
-        #     data['plugin_instance'],
-        #     data['type'],
-        #     data['type_instance'],
-        #     data['dsnames'][i],
-        #     data['dstypes'][i],
-        #     )
-        topic = "%s___%s___%s___%s" %(
-            data['host'],
-            collectd_metrics.get_metric_name(data),
-            data['dsnames'][i],
-            data['dstypes'][i],
-            )
-        epoch_ms = data['time'] * 1000
-        result.append((topic, data['values'][i], epoch_ms))
-    return result
+    return collectd_metrics.data_to_toppic(data)
 
 def main():
     consumer = Consumer(collectd_cfg['consumer'])
