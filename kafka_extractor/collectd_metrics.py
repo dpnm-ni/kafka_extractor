@@ -11,15 +11,18 @@ ping_cfg = cfg["collectd"].get("ping")
 
 def data_to_toppic(data):
     result = []
-    for i in range(0, len(data['values'])):
-        topic = "%s___%s___%s___%s" %(
-            data['host'],
-            get_metric_name(data),
-            data['dsnames'][i],
-            data['dstypes'][i],
-            )
-        epoch_ms = data['time'] * 1000
-        result.append((topic, data['values'][i], epoch_ms))
+    try:
+        for i in range(0, len(data['values'])):
+            topic = "%s___%s___%s___%s" %(
+                data['host'],
+                get_metric_name(data),
+                data['dsnames'][i],
+                data['dstypes'][i],
+                )
+            epoch_ms = data['time'] * 1000
+            result.append((topic, data['values'][i], epoch_ms))
+    except Exception as e:
+        print e
     return result
 
 def get_metric_name(data):
