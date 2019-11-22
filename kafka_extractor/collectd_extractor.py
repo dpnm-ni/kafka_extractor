@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-
 import argparse
 import sys
 import json
 import pdb
+import traceback, logging
 
 import collectd_metrics
 
 from config import cfg
 from confluent_kafka import Producer, Consumer, KafkaError, TopicPartition
+
+format_str = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=format_str)
+logger = logging.getLogger(__name__)
 
 collectd_cfg = cfg['collectd']
 
@@ -17,7 +20,7 @@ def delivery_report(err, msg):
     """ Called once for each message produced to indicate delivery result.
         Triggered by poll() or flush(). """
     if err is not None:
-        print('Message delivery failed: {}'.format(err))
+        logger.error('Message delivery failed: {}'.format(err))
 
 def extract(message):
     data = message.value().decode('utf-8')
@@ -34,13 +37,15 @@ def main():
     # see: https://github.com/confluentinc/confluent-kafka-python/issues/16
     producer.poll(0)
 
+    logger.info("Start processing collectd data ...")
+
     try:
         while True:
             msg = consumer.poll(1.0)
             if msg is None:
                 continue
             if msg.error():
-                print("Consumer error: {}".format(msg.error()))
+                logger.error("Consumer error: {}".format(msg.error()))
                 continue
 
             topic_value_list = extract(msg)

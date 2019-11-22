@@ -5,8 +5,11 @@
 #
 
 from __future__ import division
+import sys, traceback, logging
 from config import cfg
 
+
+logger = logging.getLogger(__name__)
 ping_cfg = cfg["collectd"].get("ping")
 
 def data_to_toppic(data):
@@ -22,7 +25,7 @@ def data_to_toppic(data):
             epoch_ms = data['time'] * 1000
             result.append((topic, data['values'][i], epoch_ms))
     except Exception as e:
-        print e
+        logger.warning(e, exc_info=True)
     return result
 
 def get_metric_name(data):
