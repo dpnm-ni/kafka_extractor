@@ -72,8 +72,8 @@ def main():
             data_points = []
             for item in topic_value_list:
                 data_points.append({"measurement": item[0],
-                                    "time": int(item[2]),
-                                    "epoch": "ms",
+                                    # timestamp from ms in collectd to ns in influxdb
+                                    "time": int(item[2]) * 10**6,
                                     "fields": {
                                         "value": float(item[1]),
                                     }
