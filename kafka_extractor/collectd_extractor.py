@@ -9,12 +9,14 @@ import collectd_metrics
 
 from config import cfg
 from confluent_kafka import Producer, Consumer, KafkaError, TopicPartition
+from influxdb import InfluxDBClient
 
 format_str = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
-logging.basicConfig(level=logging.DEBUG, format=format_str)
+logging.basicConfig(level=logging.INFO, format=format_str)
 logger = logging.getLogger(__name__)
 
 collectd_cfg = cfg['collectd']
+influxdb_cfg = cfg['influxdb']
 
 def delivery_report(err, msg):
     """ Called once for each message produced to indicate delivery result.
@@ -29,13 +31,18 @@ def extract(message):
     return collectd_metrics.data_to_toppic(data)
 
 def main():
+    # kafka
     consumer = Consumer(collectd_cfg['consumer'])
     consumer.subscribe(['collectd'])
-
     producer = Producer(collectd_cfg['producer'])
     # Trigger any available delivery report callbacks from previous produce() calls
     # see: https://github.com/confluentinc/confluent-kafka-python/issues/16
     producer.poll(0)
+
+    # influxdb
+    influxdb_client = InfluxDBClient(host=influxdb_cfg['server'],
+                                    database=influxdb_cfg['database'])
+    influxdb_client.create_database(influxdb_cfg['database'])
 
     logger.info("Start processing collectd data ...")
 
@@ -49,6 +56,8 @@ def main():
                 continue
 
             topic_value_list = extract(msg)
+
+            # Send extracted data to kafka topics
             # Asynchronously produce a message, the delivery report callback
             # will be triggered from poll() above, or flush() below, when the message has
             # been successfully delivered or failed permanently.
@@ -58,6 +67,19 @@ def main():
                         timestamp=item[2],
                         callback=delivery_report)
                 producer.poll(0)
+
+            # Send extracted data to influxdb
+            data_points = []
+            for item in topic_value_list:
+                data_points.append({"measurement": item[0],
+                                    "time": int(item[2]),
+                                    "epoch": "ms",
+                                    "fields": {
+                                        "value": float(item[1]),
+                                    }
+                                })
+            influxdb_client.write_points(data_points)
+
 
     except KeyboardInterrupt:
         # Wait for any outstanding messages to be delivered and delivery report

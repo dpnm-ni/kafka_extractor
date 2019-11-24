@@ -10,3 +10,7 @@ collectd:
     queue.buffering.max.ms: 1000
     batch.num.messages: 100
     api.version.request: True
+
+influxdb:
+  server: <influxdb_server_address>
+  database: collectd
