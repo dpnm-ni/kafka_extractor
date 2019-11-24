@@ -33,7 +33,7 @@ def extract(message):
 def main():
     # kafka
     consumer = Consumer(collectd_cfg['consumer'])
-    consumer.subscribe(['collectd'])
+    consumer.subscribe([collectd_cfg['raw_data_topic']])
     producer = Producer(collectd_cfg['producer'])
     # Trigger any available delivery report callbacks from previous produce() calls
     # see: https://github.com/confluentinc/confluent-kafka-python/issues/16

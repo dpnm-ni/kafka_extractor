@@ -11,6 +11,8 @@ collectd:
     batch.num.messages: 100
     api.version.request: True
 
+  raw_data_topic: collectd_raw
+
 influxdb:
   server: <influxdb_server_address>
   database: collectd
