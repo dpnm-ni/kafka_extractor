@@ -43,6 +43,12 @@ def main():
     influxdb_client = InfluxDBClient(host=influxdb_cfg['server'],
                                     database=influxdb_cfg['database'])
     influxdb_client.create_database(influxdb_cfg['database'])
+    influxdb_client.create_retention_policy(name="infinite",
+            duration='INF',
+            replication=1,
+            database=influxdb_cfg['database'],
+            default=True
+        )
 
     logger.info("Start processing collectd data ...")
 
