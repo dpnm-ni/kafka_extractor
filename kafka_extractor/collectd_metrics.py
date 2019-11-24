@@ -23,7 +23,7 @@ def data_to_toppic(data):
                 data['dstypes'][i],
                 )
             epoch_ms = data['time'] * 1000
-            result.append((topic, data['values'][i], epoch_ms))
+            result.append((topic, float(data['values'][i]), epoch_ms))
     except Exception as e:
         logger.warning(e, exc_info=True)
     return result

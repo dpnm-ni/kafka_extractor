@@ -75,7 +75,7 @@ def main():
                                     # timestamp from ms in collectd to ns in influxdb
                                     "time": int(item[2]) * 10**6,
                                     "fields": {
-                                        "value": float(item[1]),
+                                        "value": item[1],
                                     }
                                 })
             influxdb_client.write_points(data_points)
