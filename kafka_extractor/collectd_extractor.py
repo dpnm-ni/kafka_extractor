@@ -3,10 +3,12 @@ import argparse
 import sys
 import json
 import pdb
+import threading
 import traceback, logging
 
 import collectd_metrics
 
+from time import sleep
 from config import cfg
 from confluent_kafka import Producer, Consumer, KafkaError, TopicPartition
 from influxdb import InfluxDBClient
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 collectd_cfg = cfg['collectd']
 influxdb_cfg = cfg['influxdb']
+
 
 def delivery_report(err, msg):
     """ Called once for each message produced to indicate delivery result.
@@ -44,11 +47,26 @@ def main():
                                     database=influxdb_cfg['database'])
     influxdb_client.create_database(influxdb_cfg['database'])
     influxdb_client.create_retention_policy(name="infinite",
-            duration='INF',
-            replication=1,
-            database=influxdb_cfg['database'],
-            default=True
-        )
+                                            duration='INF',
+                                            replication=1,
+                                            database=influxdb_cfg['database'],
+                                            default=True
+                                        )
+
+    influxdb_data_points = []
+
+    influxdb_to_send = threading.Event()
+    influxdb_to_stop = threading.Event()
+    influxdb_to_stop.clear()
+    influxdb_to_send.clear()
+
+    def set_influxdb_to_send():
+        while not influxdb_to_stop.isSet():
+            sleep(0.5)
+            influxdb_to_send.set()
+
+    influxdb_flag_thread = threading.Thread(target=set_influxdb_to_send)
+    influxdb_flag_thread.start()
 
     logger.info("Start processing collectd data ...")
 
@@ -74,17 +92,19 @@ def main():
                         callback=delivery_report)
                 producer.poll(0)
 
-            # Send extracted data to influxdb
-            data_points = []
+            # Send extracted data to influxdb, but batching (only send every 1s)
             for item in measurements:
-                data_points.append({"measurement": item[0],
+                influxdb_data_points.append({"measurement": item[0],
                                     # timestamp from ms in collectd to ns in influxdb
                                     "time": int(item[2]) * 10**6,
                                     "fields": {
                                         "value": item[1],
                                     }
                                 })
-            influxdb_client.write_points(data_points)
+            if influxdb_to_send.isSet():
+                influxdb_client.write_points(influxdb_data_points)
+                influxdb_to_send.clear()
+                influxdb_data_points = []
 
 
     except KeyboardInterrupt:
@@ -92,6 +112,7 @@ def main():
         # callbacks to be triggered.
         producer.flush()
         consumer.close()
+        influxdb_to_stop.set()
 
 if __name__ == '__main__':
     main()
