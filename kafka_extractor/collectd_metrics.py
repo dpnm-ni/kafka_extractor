@@ -12,18 +12,18 @@ from config import cfg
 logger = logging.getLogger(__name__)
 ping_cfg = cfg["collectd"].get("ping")
 
-def data_to_toppic(data):
+def get_measurements(data):
     result = []
     try:
         for i in range(0, len(data['values'])):
-            topic = "%s___%s___%s___%s" %(
+            measurement = "%s___%s___%s___%s" %(
                 data['host'],
                 get_metric_name(data),
                 data['dsnames'][i],
                 data['dstypes'][i],
                 )
             epoch_ms = data['time'] * 1000
-            result.append((topic, float(data['values'][i]), epoch_ms))
+            result.append((measurement, float(data['values'][i]), epoch_ms))
     except Exception as e:
         logger.warning(e, exc_info=True)
     return result

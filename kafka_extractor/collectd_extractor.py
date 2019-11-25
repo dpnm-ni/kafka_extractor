@@ -28,7 +28,7 @@ def extract(message):
     data = message.value().decode('utf-8')
     data = json.loads(message.value())
     data = data[0]
-    return collectd_metrics.data_to_toppic(data)
+    return collectd_metrics.get_measurements(data)
 
 def main():
     # kafka
@@ -61,22 +61,22 @@ def main():
                 logger.error("Consumer error: {}".format(msg.error()))
                 continue
 
-            topic_value_list = extract(msg)
+            measurements = extract(msg)
 
             # Send extracted data to kafka topics
             # Asynchronously produce a message, the delivery report callback
             # will be triggered from poll() above, or flush() below, when the message has
             # been successfully delivered or failed permanently.
-            for item in topic_value_list:
-                producer.produce(topic=item[0],
-                        value=str(item[1]),
+            for item in measurements:
+                producer.produce(topic='collectd',
+                        value=str({item[0]: item[1]}),
                         timestamp=item[2],
                         callback=delivery_report)
                 producer.poll(0)
 
             # Send extracted data to influxdb
             data_points = []
-            for item in topic_value_list:
+            for item in measurements:
                 data_points.append({"measurement": item[0],
                                     # timestamp from ms in collectd to ns in influxdb
                                     "time": int(item[2]) * 10**6,
